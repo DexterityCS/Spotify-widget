@@ -361,7 +361,7 @@ body.obs-mode #widget{display:block;}
   <div class="im-item" onclick="openColorOverlay()"><div class="im-icon">&#127912;</div><span>Change Colours</span></div>
   <div class="im-divider"></div>
   <div class="im-item danger" onclick="confirmLogout()"><div class="im-icon">&#9167;</div><span>Log Out</span></div>
-  <div class="im-footer">Press ` to close</div>
+  <div class="im-footer">Press &#96; to close</div>
 </div>
 
 <!-- COLOR OVERLAY -->
@@ -651,7 +651,7 @@ function confirmLogout(){
 document.addEventListener('keydown', function(e) {
   if(!document.body.classList.contains('obs-mode')) return;
   if(['INPUT','TEXTAREA'].indexOf(document.activeElement&&document.activeElement.tagName)>=0) return;
-  if(e.key==='`'){e.preventDefault();toggleInteractMenu();}
+  if(e.key==='\x60'){e.preventDefault();toggleInteractMenu();}
   if(e.key==='Escape'){closeInteractMenu();closeColorOverlay();}
 });
 document.addEventListener('click', function(e) {
@@ -738,7 +738,7 @@ function buildOverlay(t, oAt, oRt, oExp, oCid, oCs) {
   lines.push('</div>');
 
   // Interact menu
-  lines.push('<div id="interact-menu"><div class="im-header">Widget Controls</div><div class="im-item" onclick="openColorOverlay()"><div class="im-icon">&#127912;</div><span>Change Colours</span></div><div class="im-divider"></div><div class="im-item danger" onclick="confirmLogout()"><div class="im-icon">&#9167;</div><span>Log Out</span></div><div class="im-footer">Press ` + '"`"' + ` to close</div></div>');
+  lines.push('<div id="interact-menu"><div class="im-header">Widget Controls</div><div class="im-item" onclick="openColorOverlay()"><div class="im-icon">&#127912;</div><span>Change Colours</span></div><div class="im-divider"></div><div class="im-item danger" onclick="confirmLogout()"><div class="im-icon">&#9167;</div><span>Log Out</span></div><div class="im-footer">Press &#96; to close</div></div>');
 
   // Colour overlay HTML
   lines.push('<div id="color-overlay"><div id="color-panel">');
@@ -785,7 +785,7 @@ function buildOverlay(t, oAt, oRt, oExp, oCid, oCs) {
   lines.push("function cpSave(){var t={};COLOR_KEYS.forEach(function(k){t[k]=document.getElementById('cp-hex-'+k).value;});t.radius=parseInt(document.getElementById('cp-sl-radius').value);localStorage.setItem('sp_overlay_theme',JSON.stringify(t));closeColorOverlay();}");
   lines.push("function cpReset(){cpPreset('light');localStorage.removeItem('sp_overlay_theme');}");
   lines.push("function confirmLogout(){closeInteractMenu();setTimeout(function(){if(confirm('Log out?\\nYou will need to re-run setup at dexteritycs.github.io/Spotify-widget/')){document.body.innerHTML='<div style=\"font-family:sans-serif;font-size:13px;color:#999;display:flex;align-items:center;justify-content:center;height:100vh\">Logged out.</div>';}},200);}");
-  lines.push("document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].indexOf(document.activeElement&&document.activeElement.tagName)>=0)return;if(e.key==='`'){e.preventDefault();toggleInteractMenu();}if(e.key==='Escape'){closeInteractMenu();closeColorOverlay();}});");
+  lines.push("document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].indexOf(document.activeElement&&document.activeElement.tagName)>=0)return;if(e.key==='\\x60'){e.preventDefault();toggleInteractMenu();}if(e.key==='Escape'){closeInteractMenu();closeColorOverlay();}});");
   lines.push("document.addEventListener('click',function(e){var m=document.getElementById('interact-menu');if(m.classList.contains('open')&&!m.contains(e.target))closeInteractMenu();});");
   lines.push("document.addEventListener('DOMContentLoaded',function(){document.getElementById('color-overlay').addEventListener('click',function(e){if(e.target===this)closeColorOverlay();});});");
   lines.push('<\/script></body></html>');
