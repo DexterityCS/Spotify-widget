@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spotify Now Playing</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --white: #ffffff;
+    --ink: #1a1a1a;
+    --ink-mid: #555;
+    --ink-light: #999;
+    --ink-faint: rgba(0,0,0,0.055);
+    --accent: #1DB954;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'Jost', sans-serif;
+    --r: 14px;
+  }
+
+  html, body { background: transparent; width: 100%; height: 100%; }
+
+  body {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  /* ─── Setup Panel ─── */
+  #setup-panel {
+    background: var(--white);
+    border-radius: var(--r);
+    padding: 32px 28px;
+    width: 420px;
+    box-shadow: 0 2px 40px rgba(0,0,0,0.1);
+    font-family: var(--font-sans);
+  }
+  #setup-panel h1 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  #setup-panel p {
+    font-size: 13px;
+    color: var(--ink-light);
+    line-height: 1.65;
+    margin-bottom: 24px;
+    font-weight: 300;
+  }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    background: var(--ink-faint);
+    border: 1.5px solid transparent;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .field input:focus { border-color: var(--accent); background: #fff; }
+
+  .connect-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px 20px;
+    background: var(--ink);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .connect-btn:hover { background: #111; transform: translateY(-1px); }
+  .connect-btn:active { transform: none; }
+
+  .hint-block {
+    margin-top: 20px;
+    padding: 14px 16px;
+    background: var(--ink-faint);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--ink-mid);
+    line-height: 1.75;
+  }
+  .hint-block a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .hint-block code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    background: rgba(0,0,0,0.07);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ─── Widget ─── */
+  #widget { display: none; }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--r);
+    padding: 15px 17px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+    width: 310px;
+    position: relative;
+    transition: box-shadow 0.3s;
+  }
+
+  /* Album art */
+  .art {
+    width: 50px;
+    height: 50px;
+    border-radius: 7px;
+    object-fit: cover;
+    flex-shrink: 0;
+    display: block;
+    transition: opacity 0.35s ease;
+  }
+  .art.fading { opacity: 0; }
+
+  .art-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 7px;
+    background: var(--ink-faint);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Thin rule */
+  .rule {
+    width: 1px;
+    height: 34px;
+    background: rgba(0,0,0,0.07);
+    flex-shrink: 0;
+  }
+
+  /* Text */
+  .text {
+    flex: 1;
+    min-width: 0;
+  }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 5px;
+  }
+  .pulse {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+  .pulse.off { background: var(--ink-light); animation: none; }
+  @keyframes breathe {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .eyebrow-text {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+  }
+  .song {
+    font-family: var(--font-serif);
+    font-size: 15.5px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    letter-spacing: -0.15px;
+  }
+  .artist {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--ink-mid);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Spotify watermark */
+  .sp-mark {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    opacity: 0.18;
+    transition: opacity 0.2s;
+  }
+  .card:hover .sp-mark { opacity: 0.38; }
+
+  /* Idle */
+  #idle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+  }
+  .idle-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 7px;
+    background: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .idle-title { font-family: var(--font-serif); font-size: 15px; color: var(--ink-mid); }
+  .idle-sub { font-family: var(--font-sans); font-size: 11px; color: var(--ink-light); font-weight: 300; margin-top: 2px; }
+
+  /* Re-auth banner */
+  #reauth-banner {
+    display: none;
+    margin-top: 7px;
+    padding: 8px 14px;
+    background: var(--white);
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--ink-mid);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    cursor: pointer;
+    text-align: center;
+  }
+  #reauth-banner:hover { color: var(--ink); }
+
+  /* Slide-up intro */
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate { animation: slide-up 0.3s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- Setup -->
+<div id="setup-panel">
+  <h1>Now Playing</h1>
+  <p>A minimal Spotify overlay for your Twitch stream. Connect once and it runs automatically.</p>
+
+  <div class="field">
+    <label>Client ID</label>
+    <input type="text" id="cid" placeholder="Paste your Client ID" autocomplete="off" />
+  </div>
+  <div class="field">
+    <label>Client Secret</label>
+    <input type="password" id="cs" placeholder="Paste your Client Secret" />
+  </div>
+  <button class="connect-btn" onclick="startAuth()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+    Connect with Spotify
+  </button>
+
+  <div class="hint-block">
+    <strong style="color:var(--ink);display:block;margin-bottom:4px;font-weight:500;">How to set up</strong>
+    1. Go to <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com/dashboard</a><br>
+    2. Create an app — copy the <strong>Client ID</strong> &amp; <strong>Client Secret</strong><br>
+    3. In app settings → Redirect URIs, add: <code id="redir-hint">loading…</code><br>
+    4. Fill in the fields above and click Connect
+  </div>
+</div>
+
+<!-- Widget -->
+<div id="widget">
+  <div class="card" id="card">
+
+    <!-- Now playing -->
+    <div id="np" style="display:none;width:100%">
+      <div style="display:flex;align-items:center;gap:14px">
+        <img class="art" id="art" src="" alt="Album art" />
+        <div class="rule"></div>
+        <div class="text">
+          <div class="eyebrow">
+            <div class="pulse" id="pulse"></div>
+            <span class="eyebrow-text" id="eyebrow">Now Playing</span>
+          </div>
+          <div class="song" id="song">—</div>
+          <div class="artist" id="artist">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Idle -->
+    <div id="idle-wrap">
+      <div class="idle-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <div>
+        <div class="idle-title">Nothing playing</div>
+        <div class="idle-sub">Open Spotify to begin</div>
+      </div>
+    </div>
+
+    <svg class="sp-mark" width="15" height="15" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+  </div>
+  <div id="reauth-banner" onclick="reauth()">Session expired — click to reconnect</div>
+</div>
+
+<script>
+const SCOPES = 'user-read-currently-playing user-read-playback-state';
+const REDIRECT = window.location.href.split('?')[0].split('#')[0];
+
+let cid = '', cs = '', at = '', rt = '', exp = 0, lastId = '';
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('redir-hint').textContent = REDIRECT;
+
+  cid = localStorage.getItem('sp_cid') || '';
+  cs  = localStorage.getItem('sp_cs')  || '';
+  if (cid) document.getElementById('cid').value = cid;
+  if (cs)  document.getElementById('cs').value  = '••••••••';
+
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('error')) return;
+  if (p.get('code')) {
+    history.replaceState({}, '', window.location.pathname);
+    exchange(p.get('code'));
+    return;
+  }
+
+  at  = localStorage.getItem('sp_at')  || '';
+  rt  = localStorage.getItem('sp_rt')  || '';
+  exp = parseInt(localStorage.getItem('sp_exp') || '0');
+  if (at) { go(); }
+});
+
+function startAuth() {
+  cid = document.getElementById('cid').value.trim();
+  cs  = document.getElementById('cs').value.trim();
+  if (!cid || !cs) { alert('Please enter both credentials.'); return; }
+  localStorage.setItem('sp_cid', cid);
+  localStorage.setItem('sp_cs', cs);
+  location.href = `https://accounts.spotify.com/authorize?client_id=${encodeURIComponent(cid)}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT)}&scope=${encodeURIComponent(SCOPES)}`;
+}
+
+async function exchange(code) {
+  cid = localStorage.getItem('sp_cid');
+  cs  = localStorage.getItem('sp_cs');
+  const r = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: 'Basic ' + btoa(cid + ':' + cs) },
+    body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: REDIRECT })
+  });
+  const d = await r.json();
+  if (d.error) { alert('Auth failed: ' + (d.error_description || d.error)); return; }
+  save(d);
+  go();
+}
+
+async function refresh() {
+  const r = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: 'Basic ' + btoa(cid + ':' + cs) },
+    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: rt })
+  });
+  const d = await r.json();
+  if (d.error) { document.getElementById('reauth-banner').style.display = 'block'; return false; }
+  save(d);
+  return true;
+}
+
+function save(d) {
+  at = d.access_token;
+  if (d.refresh_token) rt = d.refresh_token;
+  exp = Date.now() + d.expires_in * 1000 - 60000;
+  localStorage.setItem('sp_at', at);
+  localStorage.setItem('sp_rt', rt);
+  localStorage.setItem('sp_exp', exp);
+}
+
+function reauth() { localStorage.removeItem('sp_at'); startAuth(); }
+
+function go() {
+  document.getElementById('setup-panel').style.display = 'none';
+  document.getElementById('widget').style.display = 'block';
+  poll();
+  setInterval(poll, 5000);
+}
+
+async function poll() {
+  if (Date.now() > exp) { if (!await refresh()) return; }
+  try {
+    const r = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+      headers: { Authorization: 'Bearer ' + at }
+    });
+    if (r.status === 204 || r.status === 202) { idle(); return; }
+    if (r.status === 401) { if (await refresh()) poll(); return; }
+    if (!r.ok) { idle(); return; }
+    const d = await r.json();
+    if (!d?.item) { idle(); return; }
+    render(d);
+  } catch (e) {}
+}
+
+function render(data) {
+  const track = data.item;
+  document.getElementById('idle-wrap').style.display = 'none';
+  const np = document.getElementById('np');
+  np.style.display = '';
+
+  if (track.id !== lastId) {
+    lastId = track.id;
+    np.classList.remove('animate');
+    void np.offsetWidth;
+    np.classList.add('animate');
+
+    const img = document.getElementById('art');
+    img.classList.add('fading');
+    const src = track.album?.images?.[1]?.url || track.album?.images?.[0]?.url || '';
+    setTimeout(() => {
+      img.src = src;
+      img.onload = () => img.classList.remove('fading');
+    }, 200);
+  }
+
+  const playing = data.is_playing;
+  document.getElementById('pulse').className = 'pulse' + (playing ? '' : ' off');
+  document.getElementById('eyebrow').textContent = playing ? 'Now Playing' : 'Paused';
+  document.getElementById('song').textContent = track.name;
+  document.getElementById('artist').textContent = track.artists?.map(a => a.name).join(', ') || '';
+}
+
+function idle() {
+  document.getElementById('np').style.display = 'none';
+  document.getElementById('idle-wrap').style.display = 'flex';
+}
+</script>
+</body>
+</html>
