@@ -3,309 +3,688 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spotify Now Playing</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Spotify Now Playing — Widget Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-  :root {
-    --white: #ffffff;
-    --ink: #1a1a1a;
-    --ink-mid: #555;
-    --ink-light: #999;
-    --ink-faint: rgba(0,0,0,0.055);
-    --accent: #1DB954;
-    --font-serif: 'Cormorant Garamond', Georgia, serif;
-    --font-sans: 'Jost', sans-serif;
-    --r: 14px;
-  }
+:root {
+  --card-bg:        #ffffff;
+  --text-primary:   #1a1a1a;
+  --text-secondary: #555555;
+  --text-muted:     #999999;
+  --accent:         #1DB954;
+  --rule-color:     rgba(0,0,0,0.07);
+  --card-radius:    14px;
+  --font-serif:     'Cormorant Garamond', Georgia, serif;
+  --font-sans:      'Jost', sans-serif;
+  --green:          #1DB954;
+  --green-light:    #f0fdf4;
+  --green-border:   #bbf7d0;
+}
 
-  html, body { background: transparent; width: 100%; height: 100%; }
+html, body { background: transparent; width: 100%; height: 100%; }
+body { font-family: var(--font-sans); }
 
-  body {
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-start;
-    padding: 24px;
-    min-height: 100vh;
-  }
+/* ══════════════════════════════════════
+   SETUP SHELL
+══════════════════════════════════════ */
+#shell {
+  min-height: 100vh;
+  background: #f4f4f6;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 20px 80px;
+}
 
-  /* ─── Setup Panel ─── */
-  #setup-panel {
-    background: var(--white);
-    border-radius: var(--r);
-    padding: 32px 28px;
-    width: 420px;
-    box-shadow: 0 2px 40px rgba(0,0,0,0.1);
-    font-family: var(--font-sans);
-  }
-  #setup-panel h1 {
-    font-family: var(--font-serif);
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--ink);
-    margin-bottom: 6px;
-  }
-  #setup-panel p {
-    font-size: 13px;
-    color: var(--ink-light);
-    line-height: 1.65;
-    margin-bottom: 24px;
-    font-weight: 300;
-  }
-  .field { margin-bottom: 14px; }
-  .field label {
-    display: block;
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--ink-light);
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    margin-bottom: 6px;
-  }
-  .field input {
-    width: 100%;
-    background: var(--ink-faint);
-    border: 1.5px solid transparent;
-    border-radius: 8px;
-    padding: 10px 14px;
-    color: var(--ink);
-    font-family: var(--font-sans);
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .field input:focus { border-color: var(--accent); background: #fff; }
+.setup-wrap { width: 100%; max-width: 520px; }
 
-  .connect-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    width: 100%;
-    margin-top: 8px;
-    padding: 12px 20px;
-    background: var(--ink);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
-  }
-  .connect-btn:hover { background: #111; transform: translateY(-1px); }
-  .connect-btn:active { transform: none; }
+/* Header */
+.setup-header { text-align: center; margin-bottom: 36px; }
+.setup-logo {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.setup-logo-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--green); display: flex; align-items: center; justify-content: center;
+}
+.setup-title {
+  font-family: var(--font-serif);
+  font-size: 28px; font-weight: 500; color: #111;
+  letter-spacing: -0.3px;
+}
+.setup-subtitle {
+  font-size: 14px; color: #777; font-weight: 300; line-height: 1.6;
+  max-width: 380px; margin: 0 auto;
+}
 
-  .hint-block {
-    margin-top: 20px;
-    padding: 14px 16px;
-    background: var(--ink-faint);
-    border-radius: 8px;
-    font-size: 12px;
-    color: var(--ink-mid);
-    line-height: 1.75;
-  }
-  .hint-block a { color: var(--accent); text-decoration: none; font-weight: 500; }
-  .hint-block code {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 11px;
-    background: rgba(0,0,0,0.07);
-    padding: 1px 5px;
-    border-radius: 3px;
-  }
+/* Step progress */
+.step-progress {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-bottom: 32px;
+}
+.step-pip {
+  display: flex; align-items: center; gap: 0;
+}
+.step-circle {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
+  background: #e8e8ec; color: #999;
+  transition: background 0.3s, color 0.3s;
+  position: relative; z-index: 1;
+  flex-shrink: 0;
+}
+.step-circle.active   { background: var(--green); color: #fff; }
+.step-circle.done     { background: var(--green); color: #fff; }
+.step-circle.done::after {
+  content: '✓'; font-size: 12px;
+}
+.step-circle.done .step-num { display: none; }
+.step-line {
+  width: 48px; height: 2px;
+  background: #e0e0e4;
+  transition: background 0.3s;
+}
+.step-line.done { background: var(--green); }
+.step-label {
+  position: absolute; top: 34px; left: 50%; transform: translateX(-50%);
+  font-size: 10px; color: #aaa; white-space: nowrap; font-weight: 500;
+  letter-spacing: 0.3px;
+}
+.step-circle.active .step-label,
+.step-circle.done   .step-label { color: var(--green); }
 
-  /* ─── Widget ─── */
-  #widget { display: none; }
+/* Cards */
+.step-card {
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.07);
+  overflow: hidden;
+  display: none;
+}
+.step-card.active { display: block; }
 
-  .card {
-    background: var(--white);
-    border-radius: var(--r);
-    padding: 15px 17px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
-    width: 310px;
-    position: relative;
-    transition: box-shadow 0.3s;
-  }
+.card-header {
+  padding: 24px 28px 0;
+}
+.card-step-label {
+  font-size: 10px; font-weight: 600; color: var(--green);
+  text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 6px;
+}
+.card-title {
+  font-family: var(--font-serif); font-size: 22px; font-weight: 500;
+  color: #111; margin-bottom: 6px; letter-spacing: -0.2px;
+}
+.card-desc {
+  font-size: 13px; color: #666; font-weight: 300; line-height: 1.65;
+  padding-bottom: 20px; border-bottom: 1px solid #f0f0f2;
+}
+.card-body { padding: 24px 28px 28px; }
 
-  /* Album art */
-  .art {
-    width: 50px;
-    height: 50px;
-    border-radius: 7px;
-    object-fit: cover;
-    flex-shrink: 0;
-    display: block;
-    transition: opacity 0.35s ease;
-  }
-  .art.fading { opacity: 0; }
+/* Instruction list */
+.instr-list { list-style: none; margin-bottom: 24px; }
+.instr-list li {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid #f5f5f7;
+  font-size: 13px; color: #444; line-height: 1.55;
+}
+.instr-list li:last-child { border-bottom: none; }
+.instr-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #f0f0f2; color: #888;
+  font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.instr-list a { color: var(--green); font-weight: 500; text-decoration: none; }
+.instr-list a:hover { text-decoration: underline; }
+.instr-list code {
+  font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px;
+  background: #f0f0f4; padding: 2px 6px; border-radius: 4px;
+  color: #333; user-select: all;
+}
 
-  .art-placeholder {
-    width: 50px;
-    height: 50px;
-    border-radius: 7px;
-    background: var(--ink-faint);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+/* Info / warning boxes */
+.info-box {
+  padding: 13px 16px; border-radius: 10px;
+  font-size: 12.5px; line-height: 1.65; margin-bottom: 20px;
+}
+.info-box.green { background: var(--green-light); border: 1px solid var(--green-border); color: #166534; }
+.info-box.blue  { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+.info-box.amber { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.info-box strong { font-weight: 600; }
 
-  /* Thin rule */
-  .rule {
-    width: 1px;
-    height: 34px;
-    background: rgba(0,0,0,0.07);
-    flex-shrink: 0;
-  }
+/* Fields */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 10px; font-weight: 600; color: #888;
+  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 7px;
+}
+.field-input-wrap { position: relative; }
+.field input[type=text],
+.field input[type=password] {
+  width: 100%; background: #f6f6f8; border: 1.5px solid transparent;
+  border-radius: 9px; padding: 11px 14px; color: #111;
+  font-family: var(--font-sans); font-size: 13px; outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.field input:focus { border-color: var(--green); background: #fff; }
+.field-hint { font-size: 11px; color: #aaa; margin-top: 5px; }
 
-  /* Text */
-  .text {
-    flex: 1;
-    min-width: 0;
-  }
-  .eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 5px;
-  }
-  .pulse {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--accent);
-    flex-shrink: 0;
-    animation: breathe 2.4s ease-in-out infinite;
-  }
-  .pulse.off { background: var(--ink-light); animation: none; }
-  @keyframes breathe {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  .eyebrow-text {
-    font-family: var(--font-sans);
-    font-size: 9px;
-    font-weight: 500;
-    color: var(--ink-light);
-    text-transform: uppercase;
-    letter-spacing: 1.4px;
-  }
-  .song {
-    font-family: var(--font-serif);
-    font-size: 15.5px;
-    font-weight: 500;
-    color: var(--ink);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.2;
-    letter-spacing: -0.15px;
-  }
-  .artist {
-    font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: 300;
-    color: var(--ink-mid);
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+/* Buttons */
+.btn-row { display: flex; gap: 10px; margin-top: 8px; }
+.btn {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 12px 18px; border-radius: 9px; border: none;
+  font-family: var(--font-sans); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; letter-spacing: 0.2px;
+}
+.btn-primary { background: #111; color: #fff; }
+.btn-primary:hover { background: #000; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.btn-primary:active { transform: none; box-shadow: none; }
+.btn-secondary { background: #f0f0f2; color: #333; }
+.btn-secondary:hover { background: #e8e8ea; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { background: #18a849; transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: #888; border: 1.5px solid #e0e0e4; flex: none; padding: 12px 16px; }
+.btn-ghost:hover { border-color: #ccc; color: #555; }
 
-  /* Spotify watermark */
-  .sp-mark {
-    position: absolute;
-    bottom: 12px;
-    right: 14px;
-    opacity: 0.18;
-    transition: opacity 0.2s;
-  }
-  .card:hover .sp-mark { opacity: 0.38; }
+/* Color customization */
+.color-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 0; border-bottom: 1px solid #f2f2f4;
+}
+.color-row:last-child { border-bottom: none; }
+.color-label { font-size: 13px; color: #222; }
+.color-label span { display: block; font-size: 11px; color: #aaa; margin-top: 1px; font-weight: 300; }
+.color-right { display: flex; align-items: center; gap: 10px; }
+.color-hex {
+  width: 74px; background: #f6f6f8; border: 1.5px solid transparent;
+  border-radius: 7px; padding: 6px 8px;
+  font-family: 'SF Mono', monospace; font-size: 12px;
+  color: #111; outline: none; text-align: center; transition: border-color 0.2s;
+}
+.color-hex:focus { border-color: var(--green); background: #fff; }
+.swatch {
+  width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer;
+  outline: none; padding: 0; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  -webkit-appearance: none; appearance: none; flex-shrink: 0;
+}
+.swatch::-webkit-color-swatch-wrapper { padding: 0; }
+.swatch::-webkit-color-swatch { border: none; border-radius: 8px; }
 
-  /* Idle */
-  #idle-wrap {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-  }
-  .idle-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 7px;
-    background: var(--ink-faint);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .idle-title { font-family: var(--font-serif); font-size: 15px; color: var(--ink-mid); }
-  .idle-sub { font-family: var(--font-sans); font-size: 11px; color: var(--ink-light); font-weight: 300; margin-top: 2px; }
+.slider-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 0; border-bottom: 1px solid #f2f2f4;
+}
+.slider-label { font-size: 13px; color: #222; }
+.slider-label span { font-size: 11px; color: #aaa; margin-top: 1px; font-weight: 300; display: block; }
+.slider-right { display: flex; align-items: center; gap: 10px; }
+.slider-val { font-family: 'SF Mono', monospace; font-size: 12px; color: #aaa; min-width: 32px; text-align: right; }
+input[type=range] { width: 100px; accent-color: var(--green); cursor: pointer; }
 
-  /* Re-auth banner */
-  #reauth-banner {
-    display: none;
-    margin-top: 7px;
-    padding: 8px 14px;
-    background: var(--white);
-    border-radius: 8px;
-    font-family: var(--font-sans);
-    font-size: 11px;
-    color: var(--ink-mid);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-    cursor: pointer;
-    text-align: center;
-  }
-  #reauth-banner:hover { color: var(--ink); }
+/* Presets */
+.presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+.preset {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 13px; border-radius: 20px;
+  border: 1.5px solid #e4e4e8; background: #fff;
+  font-size: 11px; font-weight: 500; color: #333;
+  cursor: pointer; transition: all 0.15s;
+}
+.preset:hover { border-color: var(--green); background: var(--green-light); color: #111; }
+.preset-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
-  /* Slide-up intro */
-  @keyframes slide-up {
-    from { opacity: 0; transform: translateY(5px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .animate { animation: slide-up 0.3s ease forwards; }
+/* Preview */
+.preview-wrap {
+  background: repeating-conic-gradient(#e6e6e8 0% 25%, #f4f4f6 0% 50%) 0 0 / 16px 16px;
+  border-radius: 10px; padding: 22px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+}
+
+/* Section label */
+.section-label {
+  font-size: 10px; font-weight: 600; color: #aaa;
+  text-transform: uppercase; letter-spacing: 1.3px; margin-bottom: 14px;
+}
+
+/* OBS instructions */
+.obs-step {
+  display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f2f2f4;
+  align-items: flex-start;
+}
+.obs-step:last-child { border-bottom: none; }
+.obs-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: #f4f4f6; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 15px;
+}
+.obs-step-text { font-size: 13px; color: #444; line-height: 1.55; }
+.obs-step-text strong { color: #111; font-weight: 500; }
+.obs-step-text code {
+  font-family: 'SF Mono', monospace; font-size: 11px;
+  background: #f0f0f4; padding: 1px 5px; border-radius: 4px; color: #333;
+}
+
+/* ══════════════════════════════════════
+   WIDGET (OBS overlay mode)
+══════════════════════════════════════ */
+#widget { display: none; }
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  padding: 15px 17px;
+  display: flex; align-items: center; gap: 14px;
+  width: 310px; position: relative;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
+}
+.card.preview-card {
+  width: 100%; max-width: 280px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15); pointer-events: none;
+}
+.art {
+  width: 50px; height: 50px; border-radius: 7px;
+  object-fit: cover; flex-shrink: 0; display: block;
+  transition: opacity 0.3s ease;
+}
+.art.fading { opacity: 0; }
+.art-placeholder {
+  width: 50px; height: 50px; border-radius: 7px;
+  background: rgba(128,128,128,0.15); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.rule { width: 1px; height: 34px; background: var(--rule-color); flex-shrink: 0; }
+.text { flex: 1; min-width: 0; }
+.eyebrow { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+.pulse {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+  animation: breathe 2.4s ease-in-out infinite;
+}
+.pulse.off { background: var(--text-muted); animation: none; }
+@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.eyebrow-text {
+  font-family: var(--font-sans); font-size: 9px; font-weight: 500;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.4px;
+}
+.song {
+  font-family: var(--font-serif); font-size: 15.5px; font-weight: 500;
+  color: var(--text-primary); white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; line-height: 1.2;
+}
+.artist-text {
+  font-family: var(--font-sans); font-size: 11px; font-weight: 300;
+  color: var(--text-secondary); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sp-mark { position: absolute; bottom: 12px; right: 14px; opacity: 0.18; transition: opacity 0.2s; }
+.card:hover .sp-mark { opacity: 0.38; }
+
+#idle-wrap { display: flex; align-items: center; gap: 14px; width: 100%; }
+.idle-icon {
+  width: 50px; height: 50px; border-radius: 7px;
+  background: rgba(128,128,128,0.1);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.idle-title { font-family: var(--font-serif); font-size: 15px; color: var(--text-secondary); }
+.idle-sub   { font-family: var(--font-sans); font-size: 11px; color: var(--text-muted); font-weight: 300; margin-top: 2px; }
+
+#reauth-banner {
+  display: none; margin-top: 7px; padding: 8px 14px;
+  background: var(--card-bg); border-radius: 8px;
+  font-family: var(--font-sans); font-size: 11px; color: var(--text-secondary);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07); cursor: pointer; text-align: center;
+}
+
+/* OBS mode layout */
+body.obs-mode {
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: 24px; min-height: 100vh;
+}
+body.obs-mode #shell  { display: none; }
+body.obs-mode #widget { display: block; }
+
+@keyframes slide-up { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+.animate { animation: slide-up 0.3s ease forwards; }
+
+/* ══════════════════════════════════════
+   BACKTICK INTERACT MENU
+   Only appears when ` is pressed while
+   in SLOBS Interact window
+══════════════════════════════════════ */
+#interact-menu {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: 220px;
+  background: rgba(15,15,20,0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 9999;
+}
+#interact-menu.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.im-header {
+  font-family: var(--font-sans);
+  font-size: 9px; font-weight: 600;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  padding: 6px 10px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 4px;
+}
+.im-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 10px; border-radius: 8px;
+  font-family: var(--font-sans); font-size: 13px; font-weight: 400;
+  color: rgba(255,255,255,0.85);
+  cursor: pointer;
+  transition: background 0.12s;
+  user-select: none;
+}
+.im-item:hover { background: rgba(255,255,255,0.08); }
+.im-item.danger { color: #ff6b6b; }
+.im-item.danger:hover { background: rgba(255,60,60,0.12); }
+.im-icon {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 13px;
+}
+.im-item.danger .im-icon { background: rgba(255,60,60,0.12); }
+.im-label { flex: 1; }
+.im-kbd {
+  font-family: 'SF Mono', monospace; font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px; padding: 2px 6px;
+}
+.im-divider {
+  height: 1px; background: rgba(255,255,255,0.07); margin: 4px 0;
+}
+.im-footer {
+  font-size: 10px; color: rgba(255,255,255,0.2);
+  text-align: center; padding: 6px 10px 4px;
+  font-family: var(--font-sans);
+}
+.im-footer kbd {
+  font-family: 'SF Mono', monospace; font-size: 10px;
+  color: rgba(255,255,255,0.3);
+}
 </style>
 </head>
 <body>
 
-<!-- Setup -->
-<div id="setup-panel">
-  <h1>Now Playing</h1>
-  <p>A minimal Spotify overlay for your Twitch stream. Connect once and it runs automatically.</p>
+<!-- ══════════════════════════════════════
+     SETUP SHELL
+══════════════════════════════════════ -->
+<div id="shell">
+  <div class="setup-wrap">
 
-  <div class="field">
-    <label>Client ID</label>
-    <input type="text" id="cid" placeholder="Paste your Client ID" autocomplete="off" />
-  </div>
-  <div class="field">
-    <label>Client Secret</label>
-    <input type="password" id="cs" placeholder="Paste your Client Secret" />
-  </div>
-  <button class="connect-btn" onclick="startAuth()">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-    Connect with Spotify
-  </button>
+    <!-- Header -->
+    <div class="setup-header">
+      <div class="setup-logo">
+        <div class="setup-logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        </div>
+      </div>
+      <div class="setup-title">Now Playing Widget</div>
+      <p class="setup-subtitle">A Spotify overlay for your Twitch stream. Follow the steps below to get set up in a few minutes.</p>
+    </div>
 
-  <div class="hint-block">
-    <strong style="color:var(--ink);display:block;margin-bottom:4px;font-weight:500;">How to set up</strong>
-    1. Go to <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com/dashboard</a><br>
-    2. Create an app — copy the <strong>Client ID</strong> &amp; <strong>Client Secret</strong><br>
-    3. In app settings → Redirect URIs, add: <code id="redir-hint">loading…</code><br>
-    4. Fill in the fields above and click Connect
+    <!-- Progress -->
+    <div class="step-progress" id="progress-bar">
+      <div class="step-pip">
+        <div class="step-circle active" id="pip-1" style="position:relative">
+          <span class="step-num">1</span>
+          <span class="step-label">Spotify App</span>
+        </div>
+      </div>
+      <div class="step-line" id="line-1"></div>
+      <div class="step-pip">
+        <div class="step-circle" id="pip-2" style="position:relative">
+          <span class="step-num">2</span>
+          <span class="step-label">Connect</span>
+        </div>
+      </div>
+      <div class="step-line" id="line-2"></div>
+      <div class="step-pip">
+        <div class="step-circle" id="pip-3" style="position:relative">
+          <span class="step-num">3</span>
+          <span class="step-label">Appearance</span>
+        </div>
+      </div>
+      <div class="step-line" id="line-3"></div>
+      <div class="step-pip">
+        <div class="step-circle" id="pip-4" style="position:relative">
+          <span class="step-num">4</span>
+          <span class="step-label">Add to OBS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Step 1: Create Spotify App ── -->
+    <div class="step-card active" id="step-1">
+      <div class="card-header">
+        <div class="card-step-label">Step 1 of 4</div>
+        <div class="card-title">Create a Spotify App</div>
+        <p class="card-desc">You need a free Spotify developer app to let this widget read your currently playing track. This takes about 2 minutes.</p>
+      </div>
+      <div class="card-body">
+        <div class="info-box blue" style="margin-bottom:20px">
+          <strong>Why do I need this?</strong> Spotify requires apps to register before accessing your listening data. It's free, takes 2 minutes, and your data only goes between your browser and Spotify — never anywhere else.
+        </div>
+        <ul class="instr-list">
+          <li>
+            <div class="instr-num">1</div>
+            <div>Go to <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com/dashboard</a> and log in with your Spotify account.</div>
+          </li>
+          <li>
+            <div class="instr-num">2</div>
+            <div>Click <strong>Create app</strong>. Give it any name and description (e.g. "Stream Widget").</div>
+          </li>
+          <li>
+            <div class="instr-num">3</div>
+            <div>In the <strong>Redirect URIs</strong> field, paste exactly:<br><br>
+              <code>https://dexteritycs.github.io/Spotify-widget/</code>
+            </div>
+          </li>
+          <li>
+            <div class="instr-num">4</div>
+            <div>Tick the <strong>Web API</strong> checkbox, then click <strong>Save</strong>.</div>
+          </li>
+          <li>
+            <div class="instr-num">5</div>
+            <div>Open your new app's <strong>Settings</strong> — you'll need the <strong>Client ID</strong> and <strong>Client Secret</strong> on the next step.</div>
+          </li>
+        </ul>
+        <div class="btn-row">
+          <a href="https://developer.spotify.com/dashboard" target="_blank" class="btn btn-secondary" style="text-decoration:none;flex:1;display:flex;align-items:center;justify-content:center;gap:8px">
+            Open Spotify Dashboard ↗
+          </a>
+          <button class="btn btn-primary" onclick="goStep(2)">I've done this →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Step 2: Enter Credentials ── -->
+    <div class="step-card" id="step-2">
+      <div class="card-header">
+        <div class="card-step-label">Step 2 of 4</div>
+        <div class="card-title">Connect Your Spotify</div>
+        <p class="card-desc">Paste in the credentials from your Spotify app, then click Connect to authorise the widget.</p>
+      </div>
+      <div class="card-body">
+        <div class="info-box amber">
+          <strong>Where do I find these?</strong> On your Spotify app page at developer.spotify.com, click <strong>Settings</strong>. Client ID is shown directly. For Client Secret, click <strong>View client secret</strong>.
+        </div>
+        <div class="field">
+          <label>Client ID</label>
+          <input type="text" id="cid" placeholder="e.g. a1b2c3d4e5f6..." autocomplete="off" spellcheck="false" />
+          <div class="field-hint">Found under Settings in your Spotify app dashboard</div>
+        </div>
+        <div class="field">
+          <label>Client Secret</label>
+          <input type="password" id="cs" placeholder="Click 'View client secret' in Spotify" />
+          <div class="field-hint">Keep this private — it's like a password for your app</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-green" onclick="startAuth()" style="flex:2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            Connect with Spotify
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Step 3: Appearance ── -->
+    <div class="step-card" id="step-3">
+      <div class="card-header">
+        <div class="card-step-label">Step 3 of 4</div>
+        <div class="card-title">Customise the Widget</div>
+        <p class="card-desc">Choose colours and style to match your stream. Changes are saved automatically.</p>
+      </div>
+      <div class="card-body">
+
+        <div class="section-label">Presets</div>
+        <div class="presets">
+          <div class="preset" onclick="applyPreset('light')">   <div class="preset-dot" style="background:#fff;border:1px solid #ddd"></div>Light</div>
+          <div class="preset" onclick="applyPreset('dark')">    <div class="preset-dot" style="background:#1a1a2e"></div>Dark</div>
+          <div class="preset" onclick="applyPreset('midnight')"><div class="preset-dot" style="background:#0d0d0d"></div>Midnight</div>
+          <div class="preset" onclick="applyPreset('rose')">    <div class="preset-dot" style="background:#fff0f3;border:1px solid #fcc"></div>Rose</div>
+          <div class="preset" onclick="applyPreset('forest')">  <div class="preset-dot" style="background:#0f1f14"></div>Forest</div>
+          <div class="preset" onclick="applyPreset('slate')">   <div class="preset-dot" style="background:#1e293b"></div>Slate</div>
+        </div>
+
+        <div class="section-label">Preview</div>
+        <div class="preview-wrap">
+          <div class="card preview-card">
+            <div class="art-placeholder">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--text-muted)"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            </div>
+            <div class="rule"></div>
+            <div class="text">
+              <div class="eyebrow"><div class="pulse"></div><span class="eyebrow-text">Now Playing</span></div>
+              <div class="song">Song Title</div>
+              <div class="artist-text">Artist Name</div>
+            </div>
+            <svg class="sp-mark" width="15" height="15" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+          </div>
+        </div>
+
+        <div class="section-label">Colors</div>
+        <div class="color-row">
+          <div class="color-label">Card Background<span>Widget card fill</span></div>
+          <div class="color-right">
+            <input class="color-hex" id="hex-card-bg"        value="#ffffff" oninput="hexChanged('card-bg',this.value)" />
+            <input type="color" class="swatch" id="sw-card-bg"        value="#ffffff" oninput="swatchChanged('card-bg',this.value)" />
+          </div>
+        </div>
+        <div class="color-row">
+          <div class="color-label">Song Title<span>Primary text</span></div>
+          <div class="color-right">
+            <input class="color-hex" id="hex-text-primary"   value="#1a1a1a" oninput="hexChanged('text-primary',this.value)" />
+            <input type="color" class="swatch" id="sw-text-primary"   value="#1a1a1a" oninput="swatchChanged('text-primary',this.value)" />
+          </div>
+        </div>
+        <div class="color-row">
+          <div class="color-label">Artist Name<span>Secondary text</span></div>
+          <div class="color-right">
+            <input class="color-hex" id="hex-text-secondary" value="#555555" oninput="hexChanged('text-secondary',this.value)" />
+            <input type="color" class="swatch" id="sw-text-secondary" value="#555555" oninput="swatchChanged('text-secondary',this.value)" />
+          </div>
+        </div>
+        <div class="color-row">
+          <div class="color-label">Accent<span>Indicator dot color</span></div>
+          <div class="color-right">
+            <input class="color-hex" id="hex-accent"         value="#1DB954" oninput="hexChanged('accent',this.value)" />
+            <input type="color" class="swatch" id="sw-accent"         value="#1DB954" oninput="swatchChanged('accent',this.value)" />
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:18px">Shape</div>
+        <div class="slider-row">
+          <div class="slider-label">Corner Radius<span>Card roundness</span></div>
+          <div class="slider-right">
+            <input type="range" id="sl-radius" min="0" max="28" value="14" oninput="radiusChanged(this.value)" />
+            <span class="slider-val" id="val-radius">14px</span>
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-top:24px">
+          <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-secondary" onclick="resetColors()">Reset</button>
+          <button class="btn btn-primary" onclick="saveAndNext()">Save & Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Step 4: Add to OBS ── -->
+    <div class="step-card" id="step-4">
+      <div class="card-header">
+        <div class="card-step-label">Step 4 of 4</div>
+        <div class="card-title">Add to Streamlabs OBS</div>
+        <p class="card-desc">Add the widget as a Browser Source in SLOBS. It'll show up on your stream and automatically display what you're listening to.</p>
+      </div>
+      <div class="card-body">
+
+        <div class="obs-step">
+          <div class="obs-icon">➕</div>
+          <div class="obs-step-text">In SLOBS, click <strong>Add Source</strong> in your scene and choose <strong>Browser Source</strong>.</div>
+        </div>
+        <div class="obs-step">
+          <div class="obs-icon">🔗</div>
+          <div class="obs-step-text">
+            Paste this URL:<br>
+            <code onclick="this.select()" style="display:inline-block;margin-top:6px;cursor:copy;padding:5px 8px;border-radius:5px;background:#f0f0f4;font-size:12px;user-select:all">https://dexteritycs.github.io/Spotify-widget/</code>
+          </div>
+        </div>
+        <div class="obs-step">
+          <div class="obs-icon">📐</div>
+          <div class="obs-step-text">Set width to <strong>340</strong> and height to <strong>110</strong>. Position it wherever you like on screen.</div>
+        </div>
+        <div class="obs-step">
+          <div class="obs-icon">🎨</div>
+          <div class="obs-step-text">In Custom CSS, paste: <code>body { background: transparent !important; }</code> — this makes the background transparent.</div>
+        </div>
+        <div class="obs-step">
+          <div class="obs-icon">✅</div>
+          <div class="obs-step-text">Click <strong>Done</strong>. The widget will show your currently playing Spotify track automatically.</div>
+        </div>
+
+        <div class="info-box green" style="margin-top:20px">
+          <strong>💡 Pro tip —</strong> While the widget is on screen, open the <strong>Interact</strong> window in SLOBS and press <kbd style="background:rgba(0,100,0,0.1);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px">` </kbd> (backtick) to open a quick menu where you can log out or change colours without leaving your stream.
+        </div>
+
+        <div class="btn-row" style="margin-top:24px">
+          <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
+          <button class="btn btn-primary" onclick="finishSetup()">All done — show me the widget ✓</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- Widget -->
+<!-- ══ Widget ══ -->
 <div id="widget">
-  <div class="card" id="card">
-
-    <!-- Now playing -->
+  <div class="card" id="main-card">
     <div id="np" style="display:none;width:100%">
       <div style="display:flex;align-items:center;gap:14px">
         <img class="art" id="art" src="" alt="Album art" />
@@ -316,35 +695,57 @@
             <span class="eyebrow-text" id="eyebrow">Now Playing</span>
           </div>
           <div class="song" id="song">—</div>
-          <div class="artist" id="artist">—</div>
+          <div class="artist-text" id="artist">—</div>
         </div>
       </div>
     </div>
-
-    <!-- Idle -->
     <div id="idle-wrap">
       <div class="idle-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--text-muted)"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
       </div>
       <div>
         <div class="idle-title">Nothing playing</div>
         <div class="idle-sub">Open Spotify to begin</div>
       </div>
     </div>
-
     <svg class="sp-mark" width="15" height="15" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
   </div>
   <div id="reauth-banner" onclick="reauth()">Session expired — click to reconnect</div>
 </div>
 
+<!-- ══ Backtick Interact Menu ══ -->
+<div id="interact-menu">
+  <div class="im-header">Widget Controls</div>
+  <div class="im-item" onclick="openColorSettings()">
+    <div class="im-icon">🎨</div>
+    <span class="im-label">Change Colours</span>
+  </div>
+  <div class="im-divider"></div>
+  <div class="im-item danger" onclick="confirmLogout()">
+    <div class="im-icon">⏏</div>
+    <span class="im-label">Log Out</span>
+  </div>
+  <div class="im-footer">Press <kbd>`</kbd> to close</div>
+</div>
+
 <script>
-const SCOPES = 'user-read-currently-playing user-read-playback-state';
-const REDIRECT = window.location.href.split('?')[0].split('#')[0];
+const REDIRECT  = 'https://dexteritycs.github.io/Spotify-widget/';
+const SCOPES    = 'user-read-currently-playing user-read-playback-state';
+const PRESETS   = {
+  light:    { 'card-bg': '#ffffff', 'text-primary': '#1a1a1a', 'text-secondary': '#555555', accent: '#1DB954', radius: 14 },
+  dark:     { 'card-bg': '#1a1a2e', 'text-primary': '#e8e8f0', 'text-secondary': '#9090b0', accent: '#1DB954', radius: 14 },
+  midnight: { 'card-bg': '#0d0d0d', 'text-primary': '#f0f0f0', 'text-secondary': '#888888', accent: '#1DB954', radius: 16 },
+  rose:     { 'card-bg': '#fff0f3', 'text-primary': '#3d0015', 'text-secondary': '#8c4a5e', accent: '#e8526a', radius: 14 },
+  forest:   { 'card-bg': '#0f1f14', 'text-primary': '#d4ecd8', 'text-secondary': '#7aaa80', accent: '#4ade80', radius: 14 },
+  slate:    { 'card-bg': '#1e293b', 'text-primary': '#e2e8f0', 'text-secondary': '#94a3b8', accent: '#38bdf8', radius: 12 },
+};
+const COLOR_KEYS = ['card-bg', 'text-primary', 'text-secondary', 'accent'];
 
 let cid = '', cs = '', at = '', rt = '', exp = 0, lastId = '';
 
+// ── Init ──────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('redir-hint').textContent = REDIRECT;
+  loadColors();
 
   cid = localStorage.getItem('sp_cid') || '';
   cs  = localStorage.getItem('sp_cs')  || '';
@@ -352,9 +753,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cs)  document.getElementById('cs').value  = '••••••••';
 
   const p = new URLSearchParams(window.location.search);
-  if (p.get('error')) return;
+  if (p.get('error')) { showError('Spotify auth denied: ' + p.get('error')); return; }
   if (p.get('code')) {
-    history.replaceState({}, '', window.location.pathname);
+    history.replaceState({}, '', REDIRECT);
     exchange(p.get('code'));
     return;
   }
@@ -362,16 +763,142 @@ document.addEventListener('DOMContentLoaded', () => {
   at  = localStorage.getItem('sp_at')  || '';
   rt  = localStorage.getItem('sp_rt')  || '';
   exp = parseInt(localStorage.getItem('sp_exp') || '0');
-  if (at) { go(); }
+
+  // If already authenticated, skip straight to widget
+  if (at) { startWidget(); return; }
+
+  // Otherwise show the step they left off on
+  const lastStep = parseInt(localStorage.getItem('setup_step') || '1');
+  goStep(Math.min(lastStep, 3)); // cap at 3 — step 4 needs auth done
 });
 
+// ── Step navigation ───────────────────
+function goStep(n) {
+  document.querySelectorAll('.step-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  localStorage.setItem('setup_step', n);
+  updateProgress(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(current) {
+  for (let i = 1; i <= 4; i++) {
+    const pip  = document.getElementById('pip-'  + i);
+    const line = document.getElementById('line-' + i);
+    pip.classList.remove('active','done');
+    if (i < current)  pip.classList.add('done');
+    if (i === current) pip.classList.add('active');
+    if (line) line.classList.toggle('done', i < current);
+  }
+}
+
+function saveAndNext() {
+  saveColors();
+  goStep(4);
+}
+
+function finishSetup() {
+  // If already authed just go to widget, else prompt to reconnect
+  if (at) { startWidget(); }
+  else    { goStep(2); }
+}
+
+function showError(msg) {
+  goStep(2);
+  const field = document.getElementById('cid');
+  if (field) {
+    field.style.borderColor = '#ff6b6b';
+    const hint = field.closest('.field')?.querySelector('.field-hint');
+    if (hint) { hint.textContent = '⚠ ' + msg; hint.style.color = '#ff6b6b'; }
+  }
+}
+
+// ── Color system ──────────────────────
+function applyTheme(theme) {
+  const root = document.documentElement;
+  COLOR_KEYS.forEach(k => { if (theme[k]) root.style.setProperty('--' + k, theme[k]); });
+  if (theme.radius !== undefined) root.style.setProperty('--card-radius', theme.radius + 'px');
+  root.style.setProperty('--text-muted', theme['text-secondary'] || '#999');
+  const bg = theme['card-bg'] || '#fff';
+  root.style.setProperty('--rule-color', isLight(bg) ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.08)');
+}
+
+function syncInputs(theme) {
+  COLOR_KEYS.forEach(k => {
+    const hex = document.getElementById('hex-' + k);
+    const sw  = document.getElementById('sw-'  + k);
+    if (hex && theme[k]) hex.value = theme[k];
+    if (sw  && theme[k]) sw.value  = theme[k];
+  });
+  if (theme.radius !== undefined) {
+    document.getElementById('sl-radius').value = theme.radius;
+    document.getElementById('val-radius').textContent = theme.radius + 'px';
+  }
+}
+
+function applyPreset(name) { applyTheme(PRESETS[name]); syncInputs(PRESETS[name]); }
+
+function hexChanged(key, val) {
+  if (!/^#[0-9a-fA-F]{6}$/.test(val)) return;
+  document.documentElement.style.setProperty('--' + key, val);
+  const sw = document.getElementById('sw-' + key);
+  if (sw) sw.value = val;
+  if (key === 'card-bg') updateRuleColor(val);
+}
+
+function swatchChanged(key, val) {
+  document.documentElement.style.setProperty('--' + key, val);
+  const hex = document.getElementById('hex-' + key);
+  if (hex) hex.value = val;
+  if (key === 'card-bg') updateRuleColor(val);
+}
+
+function updateRuleColor(bg) {
+  document.documentElement.style.setProperty('--rule-color',
+    isLight(bg) ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.08)');
+}
+
+function radiusChanged(val) {
+  document.getElementById('val-radius').textContent = val + 'px';
+  document.documentElement.style.setProperty('--card-radius', val + 'px');
+}
+
+function saveColors() {
+  const t = {};
+  COLOR_KEYS.forEach(k => { t[k] = document.getElementById('hex-' + k)?.value || ''; });
+  t.radius = parseInt(document.getElementById('sl-radius').value);
+  localStorage.setItem('sp_theme', JSON.stringify(t));
+}
+
+function resetColors() { applyPreset('light'); localStorage.removeItem('sp_theme'); }
+
+function loadColors() {
+  const saved = localStorage.getItem('sp_theme');
+  const theme = saved ? JSON.parse(saved) : PRESETS.light;
+  applyTheme(theme);
+  syncInputs(theme);
+}
+
+function isLight(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return (r*299 + g*587 + b*114) / 1000 > 128;
+}
+
+// ── Auth ──────────────────────────────
 function startAuth() {
   cid = document.getElementById('cid').value.trim();
   cs  = document.getElementById('cs').value.trim();
-  if (!cid || !cs) { alert('Please enter both credentials.'); return; }
+  if (!cid || !cs) {
+    alert('Please paste both your Client ID and Client Secret before connecting.');
+    return;
+  }
   localStorage.setItem('sp_cid', cid);
   localStorage.setItem('sp_cs', cs);
-  location.href = `https://accounts.spotify.com/authorize?client_id=${encodeURIComponent(cid)}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT)}&scope=${encodeURIComponent(SCOPES)}`;
+  location.href = 'https://accounts.spotify.com/authorize'
+    + '?client_id='      + encodeURIComponent(cid)
+    + '&response_type=code'
+    + '&redirect_uri='   + encodeURIComponent(REDIRECT)
+    + '&scope='          + encodeURIComponent(SCOPES);
 }
 
 async function exchange(code) {
@@ -379,25 +906,25 @@ async function exchange(code) {
   cs  = localStorage.getItem('sp_cs');
   const r = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: 'Basic ' + btoa(cid + ':' + cs) },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: 'Basic ' + btoa(cid+':'+cs) },
     body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: REDIRECT })
   });
   const d = await r.json();
-  if (d.error) { alert('Auth failed: ' + (d.error_description || d.error)); return; }
+  if (d.error) { showError('Auth failed: ' + (d.error_description || d.error)); return; }
   save(d);
-  go();
+  // Advance to appearance step after auth, so they can still customise before going live
+  goStep(3);
 }
 
-async function refresh() {
+async function doRefresh() {
   const r = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: 'Basic ' + btoa(cid + ':' + cs) },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: 'Basic ' + btoa(cid+':'+cs) },
     body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: rt })
   });
   const d = await r.json();
   if (d.error) { document.getElementById('reauth-banner').style.display = 'block'; return false; }
-  save(d);
-  return true;
+  save(d); return true;
 }
 
 function save(d) {
@@ -409,28 +936,40 @@ function save(d) {
   localStorage.setItem('sp_exp', exp);
 }
 
-function reauth() { localStorage.removeItem('sp_at'); startAuth(); }
+function reauth() { localStorage.removeItem('sp_at'); location.reload(); }
 
-function go() {
-  document.getElementById('setup-panel').style.display = 'none';
-  document.getElementById('widget').style.display = 'block';
+function logout() {
+  ['sp_at','sp_rt','sp_exp','sp_cid','sp_cs'].forEach(k => localStorage.removeItem(k));
+  at = rt = cid = cs = '';
+  document.body.classList.remove('obs-mode');
+  document.getElementById('shell').style.display = '';
+  document.getElementById('widget').style.display = 'none';
+  document.getElementById('cid').value = '';
+  document.getElementById('cs').value  = '';
+  closeInteractMenu();
+  goStep(1);
+}
+
+// ── Widget ────────────────────────────
+function startWidget() {
+  document.body.classList.add('obs-mode');
   poll();
   setInterval(poll, 5000);
 }
 
 async function poll() {
-  if (Date.now() > exp) { if (!await refresh()) return; }
+  if (Date.now() > exp) { if (!await doRefresh()) return; }
   try {
     const r = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
       headers: { Authorization: 'Bearer ' + at }
     });
-    if (r.status === 204 || r.status === 202) { idle(); return; }
-    if (r.status === 401) { if (await refresh()) poll(); return; }
-    if (!r.ok) { idle(); return; }
+    if (r.status === 204 || r.status === 202) { showIdle(); return; }
+    if (r.status === 401) { if (await doRefresh()) poll(); return; }
+    if (!r.ok) { showIdle(); return; }
     const d = await r.json();
-    if (!d?.item) { idle(); return; }
+    if (!d?.item) { showIdle(); return; }
     render(d);
-  } catch (e) {}
+  } catch (_) {}
 }
 
 function render(data) {
@@ -438,32 +977,90 @@ function render(data) {
   document.getElementById('idle-wrap').style.display = 'none';
   const np = document.getElementById('np');
   np.style.display = '';
-
   if (track.id !== lastId) {
     lastId = track.id;
     np.classList.remove('animate');
     void np.offsetWidth;
     np.classList.add('animate');
-
     const img = document.getElementById('art');
     img.classList.add('fading');
     const src = track.album?.images?.[1]?.url || track.album?.images?.[0]?.url || '';
-    setTimeout(() => {
-      img.src = src;
-      img.onload = () => img.classList.remove('fading');
-    }, 200);
+    setTimeout(() => { img.src = src; img.onload = () => img.classList.remove('fading'); }, 180);
   }
-
   const playing = data.is_playing;
-  document.getElementById('pulse').className = 'pulse' + (playing ? '' : ' off');
+  document.getElementById('pulse').className     = 'pulse' + (playing ? '' : ' off');
   document.getElementById('eyebrow').textContent = playing ? 'Now Playing' : 'Paused';
-  document.getElementById('song').textContent = track.name;
-  document.getElementById('artist').textContent = track.artists?.map(a => a.name).join(', ') || '';
+  document.getElementById('song').textContent    = track.name;
+  document.getElementById('artist').textContent  = track.artists?.map(a => a.name).join(', ') || '';
 }
 
-function idle() {
+function showIdle() {
   document.getElementById('np').style.display = 'none';
   document.getElementById('idle-wrap').style.display = 'flex';
+}
+
+// ── Backtick Interact Menu ─────────────
+// The SLOBS Interact window gives keyboard focus to the page.
+// The backtick key (`) toggles a floating control menu.
+// This ONLY works when the page has keyboard focus (i.e. inside Interact).
+
+function openInteractMenu()  { document.getElementById('interact-menu').classList.add('open'); }
+function closeInteractMenu() { document.getElementById('interact-menu').classList.remove('open'); }
+function toggleInteractMenu() {
+  document.getElementById('interact-menu').classList.toggle('open');
+}
+
+document.addEventListener('keydown', e => {
+  // Only active in widget mode (obs-mode)
+  if (!document.body.classList.contains('obs-mode')) return;
+  // Don't fire if an input has focus
+  if (['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) return;
+
+  if (e.key === '`') {
+    e.preventDefault();
+    toggleInteractMenu();
+  }
+  if (e.key === 'Escape') {
+    closeInteractMenu();
+  }
+});
+
+// Close menu if user clicks outside it
+document.addEventListener('click', e => {
+  const menu = document.getElementById('interact-menu');
+  if (menu.classList.contains('open') && !menu.contains(e.target)) {
+    closeInteractMenu();
+  }
+});
+
+function openColorSettings() {
+  closeInteractMenu();
+  // Return to setup shell on the colours step
+  document.body.classList.remove('obs-mode');
+  document.getElementById('shell').style.display = '';
+  document.getElementById('widget').style.display = 'none';
+  goStep(3);
+  // Add a "back to widget" button dynamically
+  const existing = document.getElementById('back-to-widget-btn');
+  if (!existing) {
+    const btn = document.createElement('button');
+    btn.id = 'back-to-widget-btn';
+    btn.className = 'btn btn-green';
+    btn.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;flex:none;padding:12px 20px;box-shadow:0 4px 20px rgba(0,0,0,0.15)';
+    btn.textContent = '← Back to Widget';
+    btn.onclick = () => { btn.remove(); startWidget(); };
+    document.body.appendChild(btn);
+  }
+}
+
+function confirmLogout() {
+  closeInteractMenu();
+  // Brief timeout so menu close animation plays first
+  setTimeout(() => {
+    if (confirm('Log out and disconnect Spotify?\n\nYou\'ll need to reconnect to use the widget again.')) {
+      logout();
+    }
+  }, 200);
 }
 </script>
 </body>
