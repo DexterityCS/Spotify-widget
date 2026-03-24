@@ -742,46 +742,51 @@ body.obs-mode #widget { display: block; }
       </div>
     </div>
 
-    <!-- ── Step 4: Add to OBS ── -->
+    <!-- ── Step 4: Download & Add to OBS ── -->
     <div class="step-card" id="step-4">
       <div class="card-header">
         <div class="card-step-label">Step 4 of 4</div>
-        <div class="card-title">Add to Streamlabs OBS</div>
-        <p class="card-desc">Add the widget as a Browser Source in SLOBS. It'll show up on your stream and automatically display what you're listening to.</p>
+        <div class="card-title">Download Your Overlay</div>
+        <p class="card-desc">We'll generate a personal overlay file with your Spotify login and colours baked in. Add it to SLOBS once — that's it, no re-login ever.</p>
       </div>
       <div class="card-body">
 
+        <!-- Download block -->
+        <div style="background:#f8f8fa;border:2px dashed #e0e0e6;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
+          <div style="font-size:32px;margin-bottom:10px">📦</div>
+          <div style="font-family:var(--font-serif);font-size:18px;font-weight:500;color:#111;margin-bottom:6px">spotify-overlay.html</div>
+          <div style="font-size:12px;color:#888;margin-bottom:18px;font-weight:300">Your personal overlay file — contains your login &amp; colour settings</div>
+          <button class="btn btn-green" style="flex:none;width:100%;font-size:14px;padding:14px" onclick="downloadOverlay()">
+            ⬇ Download Overlay File
+          </button>
+        </div>
+
+        <div class="section-label">Then add it to SLOBS</div>
+
         <div class="obs-step">
           <div class="obs-icon">➕</div>
-          <div class="obs-step-text">In SLOBS, click <strong>Add Source</strong> in your scene and choose <strong>Browser Source</strong>.</div>
+          <div class="obs-step-text">In SLOBS, click <strong>Add Source</strong> → <strong>Browser Source</strong>.</div>
         </div>
         <div class="obs-step">
-          <div class="obs-icon">🔗</div>
-          <div class="obs-step-text">
-            Paste this URL:<br>
-            <code onclick="this.select()" style="display:inline-block;margin-top:6px;cursor:copy;padding:5px 8px;border-radius:5px;background:#f0f0f4;font-size:12px;user-select:all">https://dexteritycs.github.io/Spotify-widget/</code>
-          </div>
+          <div class="obs-icon">📁</div>
+          <div class="obs-step-text">Choose <strong>Local File</strong> and select the <strong>spotify-overlay.html</strong> file you just downloaded.</div>
         </div>
         <div class="obs-step">
           <div class="obs-icon">📐</div>
-          <div class="obs-step-text">Set width to <strong>340</strong> and height to <strong>110</strong>. Position it wherever you like on screen.</div>
-        </div>
-        <div class="obs-step">
-          <div class="obs-icon">🎨</div>
-          <div class="obs-step-text">In Custom CSS, paste: <code>body { background: transparent !important; }</code> — this makes the background transparent.</div>
+          <div class="obs-step-text">Set width to <strong>340</strong> and height to <strong>110</strong>. Position it wherever you like.</div>
         </div>
         <div class="obs-step">
           <div class="obs-icon">✅</div>
-          <div class="obs-step-text">Click <strong>Done</strong>. The widget will show your currently playing Spotify track automatically.</div>
+          <div class="obs-step-text">Click <strong>Done</strong>. The widget will show your currently playing track automatically — no login needed.</div>
         </div>
 
         <div class="info-box green" style="margin-top:20px">
-          <strong>💡 Pro tip —</strong> While the widget is on screen, open the <strong>Interact</strong> window in SLOBS and press <kbd style="background:rgba(0,100,0,0.1);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px">` </kbd> (backtick) to open a quick menu where you can log out or change colours without leaving your stream.
+          <strong>💡 Tip —</strong> While streaming, open the <strong>Interact</strong> window in SLOBS and press <kbd style="background:rgba(0,100,0,0.1);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px">`</kbd> (backtick) to change colours or log out without leaving your stream.
         </div>
 
         <div class="btn-row" style="margin-top:24px">
           <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
-          <button class="btn btn-primary" onclick="finishSetup()">All done — show me the widget ✓</button>
+          <button class="btn btn-primary" onclick="finishSetup()">Preview the widget →</button>
         </div>
       </div>
     </div>
@@ -1322,6 +1327,211 @@ function confirmLogout() {
     }
   }, 200);
 }
-</script>
+
+// ── Download Overlay ──────────────────
+function downloadOverlay() {
+  const theme  = JSON.parse(localStorage.getItem('sp_theme') || JSON.stringify(PRESETS.light));
+  const savedAt  = localStorage.getItem('sp_at')  || at;
+  const savedRt  = localStorage.getItem('sp_rt')  || rt;
+  const savedExp = localStorage.getItem('sp_exp') || String(exp);
+  const savedCid = localStorage.getItem('sp_cid') || cid;
+  const savedCs  = localStorage.getItem('sp_cs')  || cs;
+
+  if (!savedAt || !savedRt) {
+    alert('You need to connect Spotify first before downloading the overlay.');
+    goStep(2);
+    return;
+  }
+
+  const html = generateOverlayHTML({ theme, at: savedAt, rt: savedRt, exp: savedExp, cid: savedCid, cs: savedCs });
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'spotify-overlay.html'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function generateOverlayHTML({ theme: t, at, rt, exp, cid, cs }) {
+  const esc = s => String(s).replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$/g,'\\$');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Spotify Now Playing</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --card-bg:${t['card-bg']||'#ffffff'};
+  --text-primary:${t['text-primary']||'#1a1a1a'};
+  --text-secondary:${t['text-secondary']||'#555555'};
+  --text-muted:${t['text-secondary']||'#999999'};
+  --accent:${t['accent']||'#1DB954'};
+  --card-radius:${t.radius||14}px;
+  --rule-color:rgba(0,0,0,0.07);
+  --font-serif:'Cormorant Garamond',Georgia,serif;
+  --font-sans:'Jost',sans-serif;
+}
+html,body{background:transparent;width:100%;height:100%;}
+body{display:flex;align-items:flex-end;justify-content:flex-start;padding:24px;min-height:100vh;font-family:var(--font-sans);}
+.card{background:var(--card-bg);border-radius:var(--card-radius);padding:15px 17px;display:flex;align-items:center;gap:14px;width:310px;position:relative;box-shadow:0 2px 20px rgba(0,0,0,0.1),0 1px 4px rgba(0,0,0,0.06);}
+.art{width:50px;height:50px;border-radius:7px;object-fit:cover;flex-shrink:0;display:block;transition:opacity 0.3s;}
+.art.fading{opacity:0;}
+.art-placeholder{width:50px;height:50px;border-radius:7px;background:rgba(128,128,128,0.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.rule{width:1px;height:34px;background:var(--rule-color);flex-shrink:0;}
+.text{flex:1;min-width:0;}
+.eyebrow{display:flex;align-items:center;gap:5px;margin-bottom:5px;}
+.pulse{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;animation:breathe 2.4s ease-in-out infinite;}
+.pulse.off{background:var(--text-muted);animation:none;}
+@keyframes breathe{0%,100%{opacity:1}50%{opacity:0.3}}
+.eyebrow-text{font-family:var(--font-sans);font-size:9px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.4px;}
+.song{font-family:var(--font-serif);font-size:15.5px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
+.artist-text{font-family:var(--font-sans);font-size:11px;font-weight:300;color:var(--text-secondary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sp-mark{position:absolute;bottom:12px;right:14px;opacity:0.18;transition:opacity 0.2s;}
+.card:hover .sp-mark{opacity:0.38;}
+#idle-wrap{display:flex;align-items:center;gap:14px;width:100%;}
+.idle-icon{width:50px;height:50px;border-radius:7px;background:rgba(128,128,128,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.idle-title{font-family:var(--font-serif);font-size:15px;color:var(--text-secondary);}
+.idle-sub{font-family:var(--font-sans);font-size:11px;color:var(--text-muted);font-weight:300;margin-top:2px;}
+@keyframes slide-up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.animate{animation:slide-up 0.3s ease forwards;}
+#interact-menu{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);width:220px;background:rgba(15,15,20,0.92);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:8px;opacity:0;pointer-events:none;transition:opacity 0.18s,transform 0.18s;z-index:9999;}
+#interact-menu.open{opacity:1;pointer-events:all;transform:translate(-50%,-50%) scale(1);}
+.im-header{font-size:9px;font-weight:600;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1.5px;padding:6px 10px 8px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:4px;}
+.im-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;font-size:13px;color:rgba(255,255,255,0.85);cursor:pointer;transition:background 0.12s;user-select:none;}
+.im-item:hover{background:rgba(255,255,255,0.08);}
+.im-item.danger{color:#ff6b6b;}
+.im-item.danger:hover{background:rgba(255,60,60,0.12);}
+.im-icon{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;}
+.im-item.danger .im-icon{background:rgba(255,60,60,0.12);}
+.im-divider{height:1px;background:rgba(255,255,255,0.07);margin:4px 0;}
+.im-footer{font-size:10px;color:rgba(255,255,255,0.2);text-align:center;padding:6px 10px 4px;}
+#color-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:9998;}
+#color-overlay.open{opacity:1;pointer-events:all;}
+#color-panel{background:#fff;border-radius:16px;width:320px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 48px rgba(0,0,0,0.3);transform:translateY(12px) scale(0.97);transition:transform 0.2s;}
+#color-overlay.open #color-panel{transform:translateY(0) scale(1);}
+.cp-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid #f0f0f2;}
+.cp-title{font-family:var(--font-serif);font-size:17px;font-weight:500;color:#111;}
+.cp-close{width:26px;height:26px;border-radius:7px;background:#f4f4f6;border:none;cursor:pointer;font-size:12px;color:#666;display:flex;align-items:center;justify-content:center;}
+.cp-body{padding:16px 18px 18px;}
+.cp-section{font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:1.3px;margin-bottom:10px;}
+.cp-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.cp-preset{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1.5px solid #e4e4e8;background:#fff;font-size:11px;font-weight:500;color:#333;cursor:pointer;transition:all 0.15s;}
+.cp-preset:hover{border-color:#1DB954;background:#f0fdf4;}
+.cp-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.cp-preview{background:repeating-conic-gradient(#e6e6e8 0% 25%,#f4f4f6 0% 50%) 0 0/14px 14px;border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.cp-color-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f2f2f4;}
+.cp-color-row:last-child{border-bottom:none;}
+.cp-color-label{font-size:12px;color:#222;}
+.cp-color-label span{font-size:10px;color:#aaa;font-weight:300;display:block;margin-top:1px;}
+.cp-color-right{display:flex;align-items:center;gap:8px;}
+.cp-hex{width:66px;background:#f6f6f8;border:1.5px solid transparent;border-radius:6px;padding:5px 6px;font-family:'SF Mono',monospace;font-size:11px;color:#111;outline:none;text-align:center;transition:border-color 0.2s;}
+.cp-hex:focus{border-color:#1DB954;background:#fff;}
+.cp-swatch{width:26px;height:26px;border-radius:6px;border:none;cursor:pointer;outline:none;padding:0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.18);-webkit-appearance:none;appearance:none;flex-shrink:0;}
+.cp-swatch::-webkit-color-swatch-wrapper{padding:0;}
+.cp-swatch::-webkit-color-swatch{border:none;border-radius:6px;}
+.cp-slider-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f2f2f4;}
+.cp-slider-label{font-size:12px;color:#222;}
+.cp-slider-label span{font-size:10px;color:#aaa;font-weight:300;display:block;margin-top:1px;}
+.cp-slider-right{display:flex;align-items:center;gap:8px;}
+.cp-slider-val{font-family:'SF Mono',monospace;font-size:11px;color:#aaa;min-width:28px;text-align:right;}
+.cp-btn-row{display:flex;gap:8px;margin-top:14px;}
+.cp-btn{flex:1;padding:9px 12px;border-radius:8px;border:none;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-sans);}
+.cp-btn-secondary{background:#f0f0f2;color:#333;}
+.cp-btn-primary{background:#111;color:#fff;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div id="np" style="display:none;width:100%">
+    <div style="display:flex;align-items:center;gap:14px">
+      <img class="art" id="art" src="" alt="" />
+      <div class="rule"></div>
+      <div class="text">
+        <div class="eyebrow"><div class="pulse" id="pulse"></div><span class="eyebrow-text" id="eyebrow">Now Playing</span></div>
+        <div class="song" id="song">—</div>
+        <div class="artist-text" id="artist">—</div>
+      </div>
+    </div>
+  </div>
+  <div id="idle-wrap">
+    <div class="idle-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--text-muted)"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+    <div><div class="idle-title">Nothing playing</div><div class="idle-sub">Open Spotify to begin</div></div>
+  </div>
+  <svg class="sp-mark" width="15" height="15" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+</div>
+
+<div id="interact-menu">
+  <div class="im-header">Widget Controls</div>
+  <div class="im-item" onclick="openColorOverlay()"><div class="im-icon">🎨</div><span>Change Colours</span></div>
+  <div class="im-divider"></div>
+  <div class="im-item danger" onclick="confirmLogout()"><div class="im-icon">⏏</div><span>Log Out</span></div>
+  <div class="im-footer">Press \` to close</div>
+</div>
+
+<div id="color-overlay">
+  <div id="color-panel">
+    <div class="cp-header"><span class="cp-title">Widget Colours</span><button class="cp-close" onclick="closeColorOverlay()">✕</button></div>
+    <div class="cp-body">
+      <div class="cp-section">Presets</div>
+      <div class="cp-presets">
+        <div class="cp-preset" onclick="cpPreset('light')"><div class="cp-dot" style="background:#fff;border:1px solid #ddd"></div>Light</div>
+        <div class="cp-preset" onclick="cpPreset('dark')"><div class="cp-dot" style="background:#1a1a2e"></div>Dark</div>
+        <div class="cp-preset" onclick="cpPreset('midnight')"><div class="cp-dot" style="background:#0d0d0d"></div>Midnight</div>
+        <div class="cp-preset" onclick="cpPreset('rose')"><div class="cp-dot" style="background:#fff0f3;border:1px solid #fcc"></div>Rose</div>
+        <div class="cp-preset" onclick="cpPreset('forest')"><div class="cp-dot" style="background:#0f1f14"></div>Forest</div>
+        <div class="cp-preset" onclick="cpPreset('slate')"><div class="cp-dot" style="background:#1e293b"></div>Slate</div>
+      </div>
+      <div class="cp-section">Preview</div>
+      <div class="cp-preview">
+        <div class="card" style="width:100%;max-width:250px;box-shadow:0 4px 20px rgba(0,0,0,0.15);pointer-events:none">
+          <div class="art-placeholder"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--text-muted)"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+          <div class="rule"></div>
+          <div class="text"><div class="eyebrow"><div class="pulse"></div><span class="eyebrow-text">Now Playing</span></div><div class="song">Song Title</div><div class="artist-text">Artist Name</div></div>
+        </div>
+      </div>
+      <div class="cp-section">Colors</div>
+      <div class="cp-color-row"><div class="cp-color-label">Card Background<span>Widget fill</span></div><div class="cp-color-right"><input class="cp-hex" id="cp-hex-card-bg" value="${t['card-bg']||'#ffffff'}" oninput="cpHex('card-bg',this.value)"/><input type="color" class="cp-swatch" id="cp-sw-card-bg" value="${t['card-bg']||'#ffffff'}" oninput="cpSwatch('card-bg',this.value)"/></div></div>
+      <div class="cp-color-row"><div class="cp-color-label">Song Title<span>Primary text</span></div><div class="cp-color-right"><input class="cp-hex" id="cp-hex-text-primary" value="${t['text-primary']||'#1a1a1a'}" oninput="cpHex('text-primary',this.value)"/><input type="color" class="cp-swatch" id="cp-sw-text-primary" value="${t['text-primary']||'#1a1a1a'}" oninput="cpSwatch('text-primary',this.value)"/></div></div>
+      <div class="cp-color-row"><div class="cp-color-label">Artist Name<span>Secondary text</span></div><div class="cp-color-right"><input class="cp-hex" id="cp-hex-text-secondary" value="${t['text-secondary']||'#555555'}" oninput="cpHex('text-secondary',this.value)"/><input type="color" class="cp-swatch" id="cp-sw-text-secondary" value="${t['text-secondary']||'#555555'}" oninput="cpSwatch('text-secondary',this.value)"/></div></div>
+      <div class="cp-color-row"><div class="cp-color-label">Accent<span>Indicator dot</span></div><div class="cp-color-right"><input class="cp-hex" id="cp-hex-accent" value="${t['accent']||'#1DB954'}" oninput="cpHex('accent',this.value)"/><input type="color" class="cp-swatch" id="cp-sw-accent" value="${t['accent']||'#1DB954'}" oninput="cpSwatch('accent',this.value)"/></div></div>
+      <div class="cp-section" style="margin-top:12px">Shape</div>
+      <div class="cp-slider-row"><div class="cp-slider-label">Corner Radius<span>Roundness</span></div><div class="cp-slider-right"><input type="range" id="cp-sl-radius" min="0" max="28" value="${t.radius||14}" oninput="cpRadius(this.value)" style="width:80px;accent-color:#1DB954"/><span class="cp-slider-val" id="cp-val-radius">${t.radius||14}px</span></div></div>
+      <div class="cp-btn-row"><button class="cp-btn cp-btn-secondary" onclick="cpReset()">Reset</button><button class="cp-btn cp-btn-primary" onclick="cpSave()">Save & Close</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRESETS={'light':{'card-bg':'#ffffff','text-primary':'#1a1a1a','text-secondary':'#555555',accent:'#1DB954',radius:14},'dark':{'card-bg':'#1a1a2e','text-primary':'#e8e8f0','text-secondary':'#9090b0',accent:'#1DB954',radius:14},'midnight':{'card-bg':'#0d0d0d','text-primary':'#f0f0f0','text-secondary':'#888888',accent:'#1DB954',radius:16},'rose':{'card-bg':'#fff0f3','text-primary':'#3d0015','text-secondary':'#8c4a5e',accent:'#e8526a',radius:14},'forest':{'card-bg':'#0f1f14','text-primary':'#d4ecd8','text-secondary':'#7aaa80',accent:'#4ade80',radius:14},'slate':{'card-bg':'#1e293b','text-primary':'#e2e8f0','text-secondary':'#94a3b8',accent:'#38bdf8',radius:12}};
+const COLOR_KEYS=['card-bg','text-primary','text-secondary','accent'];
+let at='${esc(at)}',rt='${esc(rt)}',exp=${parseInt(exp)||0},cid='${esc(cid)}',cs='${esc(cs)}';
+let lastId='';
+function isLight(h){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return(r*299+g*587+b*114)/1000>128;}
+function applyTheme(t){const root=document.documentElement;COLOR_KEYS.forEach(k=>{if(t[k])root.style.setProperty('--'+k,t[k]);});if(t.radius!==undefined)root.style.setProperty('--card-radius',t.radius+'px');root.style.setProperty('--text-muted',t['text-secondary']||'#999');root.style.setProperty('--rule-color',isLight(t['card-bg']||'#fff')?'rgba(0,0,0,0.07)':'rgba(255,255,255,0.08)');}
+(function(){const s=localStorage.getItem('sp_overlay_theme');if(s)applyTheme(JSON.parse(s));})();
+poll();setInterval(poll,5000);
+async function poll(){if(Date.now()>exp){if(!await doRefresh())return;}try{const r=await fetch('https://api.spotify.com/v1/me/player/currently-playing',{headers:{Authorization:'Bearer '+at}});if(r.status===204||r.status===202){showIdle();return;}if(r.status===401){if(await doRefresh())poll();return;}if(!r.ok){showIdle();return;}const d=await r.json();if(!d?.item){showIdle();return;}render(d);}catch(_){}}
+async function doRefresh(){const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Authorization':'Basic '+btoa(cid+':'+cs)},body:new URLSearchParams({grant_type:'refresh_token',refresh_token:rt})});const d=await r.json();if(d.error)return false;at=d.access_token;if(d.refresh_token)rt=d.refresh_token;exp=Date.now()+d.expires_in*1000-60000;return true;}
+function render(data){const track=data.item;document.getElementById('idle-wrap').style.display='none';const np=document.getElementById('np');np.style.display='';if(track.id!==lastId){lastId=track.id;np.classList.remove('animate');void np.offsetWidth;np.classList.add('animate');const img=document.getElementById('art');img.classList.add('fading');const src=track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||'';setTimeout(()=>{img.src=src;img.onload=()=>img.classList.remove('fading');},180);}const p=data.is_playing;document.getElementById('pulse').className='pulse'+(p?'':' off');document.getElementById('eyebrow').textContent=p?'Now Playing':'Paused';document.getElementById('song').textContent=track.name;document.getElementById('artist').textContent=track.artists?.map(a=>a.name).join(', ')||'';}
+function showIdle(){document.getElementById('np').style.display='none';document.getElementById('idle-wrap').style.display='flex';}
+function toggleInteractMenu(){document.getElementById('interact-menu').classList.toggle('open');}
+function closeInteractMenu(){document.getElementById('interact-menu').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='` + '`' + `'){e.preventDefault();toggleInteractMenu();}if(e.key==='Escape'){closeInteractMenu();closeColorOverlay();}});
+document.addEventListener('click',e=>{const m=document.getElementById('interact-menu');if(m.classList.contains('open')&&!m.contains(e.target))closeInteractMenu();});
+function openColorOverlay(){closeInteractMenu();document.getElementById('color-overlay').classList.add('open');}
+function closeColorOverlay(){document.getElementById('color-overlay').classList.remove('open');}
+document.getElementById('color-overlay').addEventListener('click',function(e){if(e.target===this)closeColorOverlay();});
+function cpHex(k,v){if(!/^#[0-9a-fA-F]{6}$/.test(v))return;document.documentElement.style.setProperty('--'+k,v);const sw=document.getElementById('cp-sw-'+k);if(sw)sw.value=v;if(k==='card-bg')document.documentElement.style.setProperty('--rule-color',isLight(v)?'rgba(0,0,0,0.07)':'rgba(255,255,255,0.08)');}
+function cpSwatch(k,v){document.documentElement.style.setProperty('--'+k,v);const h=document.getElementById('cp-hex-'+k);if(h)h.value=v;if(k==='card-bg')document.documentElement.style.setProperty('--rule-color',isLight(v)?'rgba(0,0,0,0.07)':'rgba(255,255,255,0.08)');}
+function cpRadius(v){document.getElementById('cp-val-radius').textContent=v+'px';document.documentElement.style.setProperty('--card-radius',v+'px');}
+function cpPreset(n){const p=PRESETS[n];applyTheme(p);COLOR_KEYS.forEach(k=>{const h=document.getElementById('cp-hex-'+k),s=document.getElementById('cp-sw-'+k);if(h&&p[k])h.value=p[k];if(s&&p[k])s.value=p[k];});if(p.radius!==undefined){document.getElementById('cp-sl-radius').value=p.radius;document.getElementById('cp-val-radius').textContent=p.radius+'px';}}
+function cpSave(){const t={};COLOR_KEYS.forEach(k=>{t[k]=document.getElementById('cp-hex-'+k)?.value||'';});t.radius=parseInt(document.getElementById('cp-sl-radius').value);localStorage.setItem('sp_overlay_theme',JSON.stringify(t));closeColorOverlay();}
+function cpReset(){cpPreset('light');localStorage.removeItem('sp_overlay_theme');}
+function confirmLogout(){closeInteractMenu();setTimeout(()=>{if(confirm('Log out and disconnect Spotify?\\n\\nYou will need to re-run setup at dexteritycs.github.io/Spotify-widget/')){document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;font-size:13px;color:#999">Logged out. Visit dexteritycs.github.io/Spotify-widget/ to reconnect.</div>';}},200);}
+<\/script>
+</body>
+</html>`;
+}
 </body>
 </html>
