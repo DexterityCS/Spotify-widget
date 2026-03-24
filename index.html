@@ -426,6 +426,113 @@ body.obs-mode #widget { display: block; }
   font-family: 'SF Mono', monospace; font-size: 10px;
   color: rgba(255,255,255,0.3);
 }
+
+/* ── Color overlay panel (slides in over widget) ── */
+#color-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 9998;
+}
+#color-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+#color-panel {
+  background: #fff;
+  border-radius: 16px;
+  width: 340px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.3);
+  transform: translateY(12px) scale(0.97);
+  transition: transform 0.2s ease;
+}
+#color-overlay.open #color-panel {
+  transform: translateY(0) scale(1);
+}
+.cp-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #f0f0f2;
+}
+.cp-title {
+  font-family: var(--font-serif); font-size: 18px; font-weight: 500; color: #111;
+}
+.cp-close {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: #f4f4f6; border: none; cursor: pointer;
+  font-size: 13px; color: #666;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.cp-close:hover { background: #eaeaec; color: #111; }
+.cp-body { padding: 18px 20px 20px; }
+.cp-section { font-size: 10px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 1.3px; margin-bottom: 12px; }
+.cp-presets { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 18px; }
+.cp-preset {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 20px;
+  border: 1.5px solid #e4e4e8; background: #fff;
+  font-size: 11px; font-weight: 500; color: #333;
+  cursor: pointer; transition: all 0.15s;
+}
+.cp-preset:hover { border-color: var(--green); background: #f0fdf4; }
+.cp-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.cp-preview {
+  background: repeating-conic-gradient(#e6e6e8 0% 25%, #f4f4f6 0% 50%) 0 0 / 14px 14px;
+  border-radius: 10px; padding: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+}
+.cp-color-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 0; border-bottom: 1px solid #f2f2f4;
+}
+.cp-color-row:last-child { border-bottom: none; }
+.cp-color-label { font-size: 12.5px; color: #222; }
+.cp-color-label span { font-size: 10.5px; color: #aaa; font-weight: 300; display: block; margin-top: 1px; }
+.cp-color-right { display: flex; align-items: center; gap: 8px; }
+.cp-hex {
+  width: 68px; background: #f6f6f8; border: 1.5px solid transparent;
+  border-radius: 6px; padding: 5px 7px;
+  font-family: 'SF Mono', monospace; font-size: 11px;
+  color: #111; outline: none; text-align: center; transition: border-color 0.2s;
+}
+.cp-hex:focus { border-color: var(--green); background: #fff; }
+.cp-swatch {
+  width: 28px; height: 28px; border-radius: 7px; border: none; cursor: pointer;
+  outline: none; padding: 0; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  -webkit-appearance: none; appearance: none; flex-shrink: 0;
+}
+.cp-swatch::-webkit-color-swatch-wrapper { padding: 0; }
+.cp-swatch::-webkit-color-swatch { border: none; border-radius: 7px; }
+.cp-slider-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 0; border-bottom: 1px solid #f2f2f4;
+}
+.cp-slider-label { font-size: 12.5px; color: #222; }
+.cp-slider-label span { font-size: 10.5px; color: #aaa; font-weight: 300; display: block; margin-top: 1px; }
+.cp-slider-right { display: flex; align-items: center; gap: 8px; }
+.cp-slider-val { font-family: 'SF Mono', monospace; font-size: 11px; color: #aaa; min-width: 30px; text-align: right; }
+.cp-btn-row { display: flex; gap: 8px; margin-top: 18px; }
+.cp-btn {
+  flex: 1; padding: 10px 14px; border-radius: 8px; border: none;
+  font-family: var(--font-sans); font-size: 12.5px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.cp-btn-secondary { background: #f0f0f2; color: #333; }
+.cp-btn-secondary:hover { background: #e8e8ea; }
+.cp-btn-primary { background: #111; color: #fff; }
+.cp-btn-primary:hover { background: #000; }
 </style>
 </head>
 <body>
@@ -726,6 +833,87 @@ body.obs-mode #widget { display: block; }
     <span class="im-label">Log Out</span>
   </div>
   <div class="im-footer">Press <kbd>`</kbd> to close</div>
+</div>
+
+<!-- ══ Color Overlay (opens over widget from backtick menu) ══ -->
+<div id="color-overlay">
+  <div id="color-panel">
+    <div class="cp-header">
+      <span class="cp-title">Widget Colours</span>
+      <button class="cp-close" onclick="closeColorOverlay()">✕</button>
+    </div>
+    <div class="cp-body">
+
+      <div class="cp-section">Presets</div>
+      <div class="cp-presets">
+        <div class="cp-preset" onclick="cpPreset('light')">   <div class="cp-dot" style="background:#fff;border:1px solid #ddd"></div>Light</div>
+        <div class="cp-preset" onclick="cpPreset('dark')">    <div class="cp-dot" style="background:#1a1a2e"></div>Dark</div>
+        <div class="cp-preset" onclick="cpPreset('midnight')"><div class="cp-dot" style="background:#0d0d0d"></div>Midnight</div>
+        <div class="cp-preset" onclick="cpPreset('rose')">    <div class="cp-dot" style="background:#fff0f3;border:1px solid #fcc"></div>Rose</div>
+        <div class="cp-preset" onclick="cpPreset('forest')">  <div class="cp-dot" style="background:#0f1f14"></div>Forest</div>
+        <div class="cp-preset" onclick="cpPreset('slate')">   <div class="cp-dot" style="background:#1e293b"></div>Slate</div>
+      </div>
+
+      <div class="cp-section">Preview</div>
+      <div class="cp-preview">
+        <div class="card preview-card" style="max-width:260px">
+          <div class="art-placeholder">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--text-muted)"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+          <div class="rule"></div>
+          <div class="text">
+            <div class="eyebrow"><div class="pulse"></div><span class="eyebrow-text">Now Playing</span></div>
+            <div class="song">Song Title</div>
+            <div class="artist-text">Artist Name</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cp-section">Colors</div>
+      <div class="cp-color-row">
+        <div class="cp-color-label">Card Background<span>Widget fill</span></div>
+        <div class="cp-color-right">
+          <input class="cp-hex" id="cp-hex-card-bg"        value="#ffffff" oninput="cpHex('card-bg',this.value)" />
+          <input type="color" class="cp-swatch" id="cp-sw-card-bg"        value="#ffffff" oninput="cpSwatch('card-bg',this.value)" />
+        </div>
+      </div>
+      <div class="cp-color-row">
+        <div class="cp-color-label">Song Title<span>Primary text</span></div>
+        <div class="cp-color-right">
+          <input class="cp-hex" id="cp-hex-text-primary"   value="#1a1a1a" oninput="cpHex('text-primary',this.value)" />
+          <input type="color" class="cp-swatch" id="cp-sw-text-primary"   value="#1a1a1a" oninput="cpSwatch('text-primary',this.value)" />
+        </div>
+      </div>
+      <div class="cp-color-row">
+        <div class="cp-color-label">Artist Name<span>Secondary text</span></div>
+        <div class="cp-color-right">
+          <input class="cp-hex" id="cp-hex-text-secondary" value="#555555" oninput="cpHex('text-secondary',this.value)" />
+          <input type="color" class="cp-swatch" id="cp-sw-text-secondary" value="#555555" oninput="cpSwatch('text-secondary',this.value)" />
+        </div>
+      </div>
+      <div class="cp-color-row">
+        <div class="cp-color-label">Accent<span>Indicator dot</span></div>
+        <div class="cp-color-right">
+          <input class="cp-hex" id="cp-hex-accent"         value="#1DB954" oninput="cpHex('accent',this.value)" />
+          <input type="color" class="cp-swatch" id="cp-sw-accent"         value="#1DB954" oninput="cpSwatch('accent',this.value)" />
+        </div>
+      </div>
+
+      <div class="cp-section" style="margin-top:14px">Shape</div>
+      <div class="cp-slider-row">
+        <div class="cp-slider-label">Corner Radius<span>Card roundness</span></div>
+        <div class="cp-slider-right">
+          <input type="range" id="cp-sl-radius" min="0" max="28" value="14" oninput="cpRadius(this.value)" style="width:90px;accent-color:var(--green)" />
+          <span class="cp-slider-val" id="cp-val-radius">14px</span>
+        </div>
+      </div>
+
+      <div class="cp-btn-row">
+        <button class="cp-btn cp-btn-secondary" onclick="cpReset()">Reset</button>
+        <button class="cp-btn cp-btn-primary"   onclick="cpSave()">Save & Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1035,22 +1223,94 @@ document.addEventListener('click', e => {
 
 function openColorSettings() {
   closeInteractMenu();
-  // Return to setup shell on the colours step
-  document.body.classList.remove('obs-mode');
-  document.getElementById('shell').style.display = '';
-  document.getElementById('widget').style.display = 'none';
-  goStep(3);
-  // Add a "back to widget" button dynamically
-  const existing = document.getElementById('back-to-widget-btn');
-  if (!existing) {
-    const btn = document.createElement('button');
-    btn.id = 'back-to-widget-btn';
-    btn.className = 'btn btn-green';
-    btn.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;flex:none;padding:12px 20px;box-shadow:0 4px 20px rgba(0,0,0,0.15)';
-    btn.textContent = '← Back to Widget';
-    btn.onclick = () => { btn.remove(); startWidget(); };
-    document.body.appendChild(btn);
+  // Sync the overlay inputs from current saved theme before opening
+  const saved = localStorage.getItem('sp_theme');
+  const theme = saved ? JSON.parse(saved) : PRESETS.light;
+  COLOR_KEYS.forEach(k => {
+    const hex = document.getElementById('cp-hex-' + k);
+    const sw  = document.getElementById('cp-sw-'  + k);
+    const val = theme[k] || '';
+    if (hex && val) hex.value = val;
+    if (sw  && val) sw.value  = val;
+  });
+  if (theme.radius !== undefined) {
+    document.getElementById('cp-sl-radius').value = theme.radius;
+    document.getElementById('cp-val-radius').textContent = theme.radius + 'px';
   }
+  document.getElementById('color-overlay').classList.add('open');
+}
+
+function closeColorOverlay() {
+  document.getElementById('color-overlay').classList.remove('open');
+}
+
+// Close overlay on backdrop click
+document.getElementById('color-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeColorOverlay();
+});
+
+function cpHex(key, val) {
+  if (!/^#[0-9a-fA-F]{6}$/.test(val)) return;
+  document.documentElement.style.setProperty('--' + key, val);
+  const sw = document.getElementById('cp-sw-' + key);
+  if (sw) sw.value = val;
+  // keep main setup inputs in sync too
+  const mainHex = document.getElementById('hex-' + key);
+  const mainSw  = document.getElementById('sw-'  + key);
+  if (mainHex) mainHex.value = val;
+  if (mainSw)  mainSw.value  = val;
+  if (key === 'card-bg') updateRuleColor(val);
+}
+
+function cpSwatch(key, val) {
+  document.documentElement.style.setProperty('--' + key, val);
+  const hex = document.getElementById('cp-hex-' + key);
+  if (hex) hex.value = val;
+  const mainHex = document.getElementById('hex-' + key);
+  const mainSw  = document.getElementById('sw-'  + key);
+  if (mainHex) mainHex.value = val;
+  if (mainSw)  mainSw.value  = val;
+  if (key === 'card-bg') updateRuleColor(val);
+}
+
+function cpRadius(val) {
+  document.getElementById('cp-val-radius').textContent = val + 'px';
+  document.documentElement.style.setProperty('--card-radius', val + 'px');
+  const mainSl = document.getElementById('sl-radius');
+  const mainVl = document.getElementById('val-radius');
+  if (mainSl) mainSl.value = val;
+  if (mainVl) mainVl.textContent = val + 'px';
+}
+
+function cpPreset(name) {
+  const p = PRESETS[name];
+  applyTheme(p);
+  syncInputs(p);
+  // Sync overlay inputs
+  COLOR_KEYS.forEach(k => {
+    const hex = document.getElementById('cp-hex-' + k);
+    const sw  = document.getElementById('cp-sw-'  + k);
+    if (hex && p[k]) hex.value = p[k];
+    if (sw  && p[k]) sw.value  = p[k];
+  });
+  if (p.radius !== undefined) {
+    document.getElementById('cp-sl-radius').value = p.radius;
+    document.getElementById('cp-val-radius').textContent = p.radius + 'px';
+  }
+}
+
+function cpSave() {
+  // Build theme from overlay inputs
+  const t = {};
+  COLOR_KEYS.forEach(k => { t[k] = document.getElementById('cp-hex-' + k)?.value || ''; });
+  t.radius = parseInt(document.getElementById('cp-sl-radius').value);
+  localStorage.setItem('sp_theme', JSON.stringify(t));
+  closeColorOverlay();
+}
+
+function cpReset() {
+  cpPreset('light');
+  localStorage.removeItem('sp_theme');
 }
 
 function confirmLogout() {
